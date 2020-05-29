@@ -10,12 +10,13 @@ func (p *Provider) handleMessage(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	messageString, mentions, err := payload.Parse(c.Request())
+	messageString, err := payload.Parse(c.Request())
 	if err != nil {
 		return err
 	}
 	for _, msg := range wrapMessage(messageString, 4000) {
-		_, err = p.Bot.SendIm(c.Param("target"), msg, mentions)
+		message := p.Bot.NewTextMessage(c.Param("target"), msg)
+		err = message.Send()
 		if err != nil {
 			return err
 		}

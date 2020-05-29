@@ -50,15 +50,15 @@ type Message struct {
 	EvalMatches []MetricValue `json:"evalMatches"`
 }
 
-func (*Message) transform(data io.ReadCloser) (string, []string, error) {
+func (*Message) transform(data io.ReadCloser) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	gm := Message{}
 	err = json.Unmarshal(messageBytes, &gm)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	lines := []string{
 		gm.Title,
@@ -67,10 +67,10 @@ func (*Message) transform(data io.ReadCloser) (string, []string, error) {
 	for _, metric := range gm.EvalMatches {
 		lines = append(lines, metric.Metric+": "+fmt.Sprint(metric.Value))
 	}
-	return strings.Join(lines, "\n"), nil, nil
+	return strings.Join(lines, "\n"), nil
 }
 
 // Parse implement Payload.Parse()
-func (gm Message) Parse(req *http.Request) (string, []string, error) {
+func (gm Message) Parse(req *http.Request) (string, error) {
 	return gm.transform(req.Body)
 }

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"icqag/icq"
+	"github.com/mail-ru-im/bot-golang"
 	"icqag/webhook"
 	"icqag/webhook/alertmanager"
 	"icqag/webhook/grafana"
@@ -22,7 +22,7 @@ var payloadSourceMap = map[string]webhook.Payload{
 
 // Provider represent single instances of bot and echo
 type Provider struct {
-	Bot      *icq.Bot
+	Bot      *botgolang.Bot
 	instance *echo.Echo
 }
 

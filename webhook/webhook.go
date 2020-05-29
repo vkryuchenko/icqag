@@ -6,5 +6,5 @@ import (
 
 // Payload interface for any data from any alert systems
 type Payload interface {
-	Parse(req *http.Request) (string, []string, error)
+	Parse(req *http.Request) (string, error)
 }

@@ -36,15 +36,15 @@ type SuspectMessage struct {
 	Error       map[string][]string `json:"error"`
 }
 
-func (*SuspectMessage) transform(data io.ReadCloser) (string, []string, error) {
+func (*SuspectMessage) transform(data io.ReadCloser) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	sm := SuspectMessage{}
 	err = json.Unmarshal(messageBytes, &sm)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	lines := []string{
 		"Status: " + strings.ToUpper(sm.Event),
@@ -52,24 +52,22 @@ func (*SuspectMessage) transform(data io.ReadCloser) (string, []string, error) {
 		"Branch: " + sm.Branch,
 		"URL: " + sm.BuildURL,
 	}
-	var mentions []string
 	for author, errors := range sm.Error {
 		suspect := author
 		if emailRegexp.MatchString(author) {
 			matchResult := emailRegexp.FindStringSubmatch(author)
 			currentMention := matchResult[1]
 			suspect = "@[" + currentMention + "]"
-			mentions = append(mentions, currentMention)
 		}
 		lines = append(lines, "\nSUSPECT: "+suspect+"\nERRORS:")
 		for _, errLine := range errors {
 			lines = append(lines, "### "+errLine)
 		}
 	}
-	return strings.Join(lines, "\n"), mentions, nil
+	return strings.Join(lines, "\n"), nil
 }
 
 // Parse implement Payload.Parse()
-func (m SuspectMessage) Parse(req *http.Request) (string, []string, error) {
+func (m SuspectMessage) Parse(req *http.Request) (string, error) {
 	return m.transform(req.Body)
 }

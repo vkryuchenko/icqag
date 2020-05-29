@@ -23,25 +23,25 @@ type OutboundMessage struct {
 	ProjectName string `json:"projectName"`
 }
 
-func (*OutboundMessage) transform(data io.ReadCloser) (string, []string, error) {
+func (*OutboundMessage) transform(data io.ReadCloser) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	om := OutboundMessage{}
 	err = json.Unmarshal(messageBytes, &om)
 	if err != nil {
-		return "", nil, err
+		return "", err
 	}
 	lines := []string{
 		"Status: " + strings.ToUpper(om.Event),
 		"Build: " + om.ProjectName + " :: " + om.BuildName,
 		"URL: " + om.BuildURL,
 	}
-	return strings.Join(lines, "\n"), nil, nil
+	return strings.Join(lines, "\n"), nil
 }
 
 // Parse implement Payload.Parse()
-func (m OutboundMessage) Parse(req *http.Request) (string, []string, error) {
+func (m OutboundMessage) Parse(req *http.Request) (string, error) {
 	return m.transform(req.Body)
 }

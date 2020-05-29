@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/labstack/gommon/log"
-	"icqag/icq"
+	"github.com/mail-ru-im/bot-golang"
 	"icqag/web"
 	"os"
 )
@@ -13,27 +13,10 @@ func init() {
 }
 
 func main() {
-	botToken := os.Getenv("BOT_TOKEN")     // required
-	botUin := os.Getenv("BOT_UIN")         // optional
-	botNick := os.Getenv("BOT_NICK")       // optional
-	botName := os.Getenv("BOT_NAME")       // optional
-	botVersion := os.Getenv("BOT_VERSION") // optional
-	if botName == "" {
-		botName = botNick
-	}
-	bot := icq.Bot{
-		//RootURL:"http://localhost:5000",
-		Name:    botName,
-		Nick:    botNick,
-		Uin:     botUin,
-		Token:   botToken,
-		Version: botVersion,
-	}
-	err := bot.Init()
+	bot, err := botgolang.NewBot(os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	webProvider := web.Provider{Bot: &bot}
+	webProvider := web.Provider{Bot: bot}
 	log.Fatal(webProvider.Start())
 }
