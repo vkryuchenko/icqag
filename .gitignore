@@ -17,6 +17,7 @@
 # IntelliJ
 .idea/
 out/
+go.sum
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
