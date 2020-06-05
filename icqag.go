@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/labstack/gommon/log"
 	"github.com/mail-ru-im/bot-golang"
-	"icqag/web"
+	"icqag/webhook"
 	"os"
 )
 
@@ -17,6 +17,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	webProvider := web.Provider{Bot: bot}
+	webProvider := webhook.Provider{Bot: bot}
 	log.Fatal(webProvider.Start())
 }

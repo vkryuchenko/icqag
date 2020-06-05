@@ -1,4 +1,4 @@
-package webhook
+package alertsource
 
 import (
 	"net/http"

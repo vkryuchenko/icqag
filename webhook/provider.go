@@ -1,18 +1,18 @@
-package web
+package webhook
 
 import (
 	"errors"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/mail-ru-im/bot-golang"
-	"icqag/webhook"
-	"icqag/webhook/alertmanager"
-	"icqag/webhook/grafana"
-	"icqag/webhook/jenkins"
-	"icqag/webhook/raw"
+	"icqag/alertsource"
+	"icqag/alertsource/alertmanager"
+	"icqag/alertsource/grafana"
+	"icqag/alertsource/jenkins"
+	"icqag/alertsource/raw"
 )
 
-var payloadSourceMap = map[string]webhook.Payload{
+var payloadSourceMap = map[string]alertsource.Payload{
 	"raw":              raw.Message{},
 	"grafana":          grafana.Message{},
 	"jenkins-outbound": jenkins.OutboundMessage{},
@@ -26,7 +26,7 @@ type Provider struct {
 	instance *echo.Echo
 }
 
-func (Provider) payloadBySourceName(sourceName string) (webhook.Payload, error) {
+func (Provider) payloadBySourceName(sourceName string) (alertsource.Payload, error) {
 	payload, ok := payloadSourceMap[sourceName]
 	if !ok {
 		return nil, errors.New("unknown alert source")
