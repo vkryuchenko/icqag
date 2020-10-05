@@ -1,30 +1,20 @@
 package raw
 
 import (
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
 )
 
-// Message represent data from any JSON
-type Message map[string]interface{}
+// Message represent data from any data
+type Message []byte
 
 func transformMessage(data io.ReadCloser) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
-	rm := Message{}
-	err = json.Unmarshal(messageBytes, &rm)
-	if err != nil {
-		return "", err
-	}
-	indentJSON, err := json.MarshalIndent(rm, "", " ")
-	if err != nil {
-		return "", err
-	}
-	return string(indentJSON[:]), nil
+	return string(messageBytes), nil
 }
 
 // Parse implement Payload.Parse()

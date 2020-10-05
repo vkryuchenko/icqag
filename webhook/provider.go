@@ -9,10 +9,12 @@ import (
 	"icqag/alertsource/alertmanager"
 	"icqag/alertsource/grafana"
 	"icqag/alertsource/jenkins"
+	"icqag/alertsource/json"
 	"icqag/alertsource/raw"
 )
 
 var payloadSourceMap = map[string]alertsource.Payload{
+	"json":             json.Message{},
 	"raw":              raw.Message{},
 	"grafana":          grafana.Message{},
 	"jenkins-outbound": jenkins.OutboundMessage{},
