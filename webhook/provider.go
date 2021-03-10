@@ -5,21 +5,28 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/mail-ru-im/bot-golang"
-	"icqag/alertsource"
 	"icqag/alertsource/alertmanager"
 	"icqag/alertsource/grafana"
 	"icqag/alertsource/jenkins"
 	"icqag/alertsource/json"
 	"icqag/alertsource/raw"
+	"icqag/alertsource/teamcity"
+	"net/http"
 )
 
-var payloadSourceMap = map[string]alertsource.Payload{
-	"json":             json.Message{},
-	"raw":              raw.Message{},
-	"grafana":          grafana.Message{},
-	"jenkins-outbound": jenkins.OutboundMessage{},
-	"jenkins-suspect":  jenkins.SuspectMessage{},
-	"alertmanager":     alertmanager.Message{},
+var payloadSourceMap = map[string]Payload{
+	"json":                json.Message{},
+	"raw":                 raw.Message{},
+	"grafana":             grafana.Message{},
+	"jenkins-outbound":    jenkins.OutboundMessage{},
+	"jenkins-suspect":     jenkins.SuspectMessage{},
+	"alertmanager":        alertmanager.Message{},
+	"teamcity-elasticdoc": teamcity.ElasticsearchDocumentMessage{},
+}
+
+// Payload interface for any data from any alert systems
+type Payload interface {
+	Parse(req *http.Request) (string, error)
 }
 
 // Provider represent single instances of bot and echo
@@ -28,7 +35,7 @@ type Provider struct {
 	instance *echo.Echo
 }
 
-func (Provider) payloadBySourceName(sourceName string) (alertsource.Payload, error) {
+func (Provider) payloadBySourceName(sourceName string) (Payload, error) {
 	payload, ok := payloadSourceMap[sourceName]
 	if !ok {
 		return nil, errors.New("unknown alert source")
