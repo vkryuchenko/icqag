@@ -4,6 +4,7 @@ ENV GOPATH="/go" CGO_ENABLED=0
 WORKDIR /app
 COPY . .
 RUN apk add --no-cache git
+RUN go mod tidy
 RUN go build -o icqag icqag.go
 
 FROM alpine:latest
