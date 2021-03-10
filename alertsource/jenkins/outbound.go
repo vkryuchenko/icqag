@@ -2,6 +2,7 @@ package jenkins
 
 import (
 	"encoding/json"
+	"github.com/labstack/echo"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -23,25 +24,26 @@ type OutboundMessage struct {
 	ProjectName string `json:"projectName"`
 }
 
-func (*OutboundMessage) transform(data io.ReadCloser) (string, error) {
+func (*OutboundMessage) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
-	om := OutboundMessage{}
-	err = json.Unmarshal(messageBytes, &om)
+	logger.Debug(string(messageBytes))
+	message := OutboundMessage{}
+	err = json.Unmarshal(messageBytes, &message)
 	if err != nil {
 		return "", err
 	}
 	lines := []string{
-		"Status: " + strings.ToUpper(om.Event),
-		"Build: " + om.ProjectName + " :: " + om.BuildName,
-		"URL: " + om.BuildURL,
+		"Status: " + strings.ToUpper(message.Event),
+		"Build: " + message.ProjectName + " :: " + message.BuildName,
+		"URL: " + message.BuildURL,
 	}
 	return strings.Join(lines, "\n"), nil
 }
 
 // Parse implement Payload.Parse()
-func (m OutboundMessage) Parse(req *http.Request) (string, error) {
-	return m.transform(req.Body)
+func (m OutboundMessage) Parse(req *http.Request, logger echo.Logger) (string, error) {
+	return m.transform(req.Body, logger)
 }

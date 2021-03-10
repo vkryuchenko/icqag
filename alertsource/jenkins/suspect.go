@@ -2,6 +2,7 @@ package jenkins
 
 import (
 	"encoding/json"
+	"github.com/labstack/echo"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -36,23 +37,24 @@ type SuspectMessage struct {
 	Error       map[string][]string `json:"error"`
 }
 
-func (*SuspectMessage) transform(data io.ReadCloser) (string, error) {
+func (*SuspectMessage) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
-	sm := SuspectMessage{}
-	err = json.Unmarshal(messageBytes, &sm)
+	logger.Debug(string(messageBytes))
+	message := SuspectMessage{}
+	err = json.Unmarshal(messageBytes, &message)
 	if err != nil {
 		return "", err
 	}
 	lines := []string{
-		"Status: " + strings.ToUpper(sm.Event),
-		"Name: " + sm.ProjectName,
-		"Branch: " + sm.Branch,
-		"URL: " + sm.BuildURL,
+		"Status: " + strings.ToUpper(message.Event),
+		"Name: " + message.ProjectName,
+		"Branch: " + message.Branch,
+		"URL: " + message.BuildURL,
 	}
-	for author, errors := range sm.Error {
+	for author, errors := range message.Error {
 		suspect := author
 		if emailRegexp.MatchString(author) {
 			matchResult := emailRegexp.FindStringSubmatch(author)
@@ -68,6 +70,6 @@ func (*SuspectMessage) transform(data io.ReadCloser) (string, error) {
 }
 
 // Parse implement Payload.Parse()
-func (m SuspectMessage) Parse(req *http.Request) (string, error) {
-	return m.transform(req.Body)
+func (m SuspectMessage) Parse(req *http.Request, logger echo.Logger) (string, error) {
+	return m.transform(req.Body, logger)
 }

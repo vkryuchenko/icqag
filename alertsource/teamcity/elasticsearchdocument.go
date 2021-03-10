@@ -2,6 +2,7 @@ package teamcity
 
 import (
 	"encoding/json"
+	"github.com/labstack/echo"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -37,11 +38,12 @@ type ElasticsearchDocumentMessage struct {
 	TriggeredBy       string `json:"triggeredBy"`
 }
 
-func (*ElasticsearchDocumentMessage) transform(data io.ReadCloser) (string, error) {
+func (*ElasticsearchDocumentMessage) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
+	logger.Debug(string(messageBytes))
 	message := ElasticsearchDocumentMessage{}
 	err = json.Unmarshal(messageBytes, &message)
 	if err != nil {
@@ -54,15 +56,15 @@ func (*ElasticsearchDocumentMessage) transform(data io.ReadCloser) (string, erro
 	lines := []string{
 		"Status: " + status,
 		"Build: " + message.BuildName,
-		"Branch: " + strings.TrimLeft(message.BranchDisplayName, "refs/heads/"),
+		"Branch: " + strings.Replace(message.BranchDisplayName, "refs/heads/", "", 1),
 		"Agent: " + message.AgentName,
-		"Triggered: " + message.TriggeredBy,
+		"Triggered by: " + message.TriggeredBy,
 		"URL: " + message.BuildStatusUrl,
 	}
 	return strings.Join(lines, "\n"), nil
 }
 
 // Parse implement Payload.Parse()
-func (m ElasticsearchDocumentMessage) Parse(req *http.Request) (string, error) {
-	return m.transform(req.Body)
+func (m ElasticsearchDocumentMessage) Parse(req *http.Request, logger echo.Logger) (string, error) {
+	return m.transform(req.Body, logger)
 }

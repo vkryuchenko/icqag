@@ -3,6 +3,7 @@ package grafana
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/labstack/echo"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -50,27 +51,28 @@ type Message struct {
 	EvalMatches []MetricValue `json:"evalMatches"`
 }
 
-func (*Message) transform(data io.ReadCloser) (string, error) {
+func (*Message) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
-	gm := Message{}
-	err = json.Unmarshal(messageBytes, &gm)
+	logger.Debug(string(messageBytes))
+	message := Message{}
+	err = json.Unmarshal(messageBytes, &message)
 	if err != nil {
 		return "", err
 	}
 	lines := []string{
-		gm.Title,
-		gm.Message,
+		message.Title,
+		message.Message,
 	}
-	for _, metric := range gm.EvalMatches {
+	for _, metric := range message.EvalMatches {
 		lines = append(lines, metric.Metric+": "+fmt.Sprint(metric.Value))
 	}
 	return strings.Join(lines, "\n"), nil
 }
 
 // Parse implement Payload.Parse()
-func (gm Message) Parse(req *http.Request) (string, error) {
-	return gm.transform(req.Body)
+func (gm Message) Parse(req *http.Request, logger echo.Logger) (string, error) {
+	return gm.transform(req.Body, logger)
 }

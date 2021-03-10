@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"github.com/labstack/gommon/log"
 	"github.com/mail-ru-im/bot-golang"
 	"icqag/alertsource/alertmanager"
 	"icqag/alertsource/grafana"
@@ -12,6 +13,8 @@ import (
 	"icqag/alertsource/raw"
 	"icqag/alertsource/teamcity"
 	"net/http"
+	"os"
+	"strings"
 )
 
 var payloadSourceMap = map[string]Payload{
@@ -26,7 +29,7 @@ var payloadSourceMap = map[string]Payload{
 
 // Payload interface for any data from any alert systems
 type Payload interface {
-	Parse(req *http.Request) (string, error)
+	Parse(req *http.Request, logger echo.Logger) (string, error)
 }
 
 // Provider represent single instances of bot and echo
@@ -47,6 +50,11 @@ func (p *Provider) initEcho() {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
+	if strings.EqualFold(os.Getenv("MODE"), "debug") {
+		e.Debug = true
+		e.Logger.SetLevel(log.DEBUG)
+		e.Logger.Debug("debug mode enabled")
+	}
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	//

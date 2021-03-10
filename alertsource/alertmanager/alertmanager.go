@@ -2,6 +2,7 @@ package alertmanager
 
 import (
 	"encoding/json"
+	"github.com/labstack/echo"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -32,22 +33,23 @@ type Message struct {
 	Alerts       []Alert     `json:"alerts"`
 }
 
-func (*Message) transform(data io.ReadCloser) (string, error) {
+func (*Message) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
-	msg := Message{}
-	err = json.Unmarshal(messageBytes, &msg)
+	logger.Debug(string(messageBytes))
+	message := Message{}
+	err = json.Unmarshal(messageBytes, &message)
 	if err != nil {
 		return "", err
 	}
 	lines := []string{
-		msg.Status,
-		msg.GroupKey,
+		message.Status,
+		message.GroupKey,
 		"Alerts:",
 	}
-	for _, alert := range msg.Alerts {
+	for _, alert := range message.Alerts {
 		lines = append(
 			lines,
 			"Started: "+alert.StartsAt,
@@ -61,6 +63,6 @@ func (*Message) transform(data io.ReadCloser) (string, error) {
 }
 
 // Parse implement Payload.Parse()
-func (gm Message) Parse(req *http.Request) (string, error) {
-	return gm.transform(req.Body)
+func (gm Message) Parse(req *http.Request, logger echo.Logger) (string, error) {
+	return gm.transform(req.Body, logger)
 }

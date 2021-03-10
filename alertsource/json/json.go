@@ -2,6 +2,7 @@ package json
 
 import (
 	"encoding/json"
+	"github.com/labstack/echo"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,17 +11,18 @@ import (
 // Message represent data from any JSON
 type Message map[string]interface{}
 
-func transformMessage(data io.ReadCloser) (string, error) {
+func transformMessage(data io.ReadCloser, logger echo.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
 	}
-	rm := Message{}
-	err = json.Unmarshal(messageBytes, &rm)
+	logger.Debug(string(messageBytes))
+	message := Message{}
+	err = json.Unmarshal(messageBytes, &message)
 	if err != nil {
 		return "", err
 	}
-	indentJSON, err := json.MarshalIndent(rm, "", " ")
+	indentJSON, err := json.MarshalIndent(message, "", " ")
 	if err != nil {
 		return "", err
 	}
@@ -28,6 +30,6 @@ func transformMessage(data io.ReadCloser) (string, error) {
 }
 
 // Parse implement Payload.Parse()
-func (m Message) Parse(req *http.Request) (string, error) {
-	return transformMessage(req.Body)
+func (m Message) Parse(req *http.Request, logger echo.Logger) (string, error) {
+	return transformMessage(req.Body, logger)
 }

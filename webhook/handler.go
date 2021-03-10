@@ -10,7 +10,7 @@ func (p *Provider) handleMessage(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	messageString, err := payload.Parse(c.Request())
+	messageString, err := payload.Parse(c.Request(), p.instance.Logger)
 	if err != nil {
 		return err
 	}
