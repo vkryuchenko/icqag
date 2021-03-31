@@ -13,7 +13,16 @@ func init() {
 }
 
 func main() {
-	bot, err := botgolang.NewBot(os.Getenv("BOT_TOKEN"))
+	var options []botgolang.BotOption
+	apiUrl := os.Getenv("API_URL")
+	if apiUrl != "" {
+		options = append(options, botgolang.BotApiURL(apiUrl))
+	}
+	debug := os.Getenv("DEBUG")
+	if debug == "true" {
+		options = append(options, botgolang.BotDebug(true))
+	}
+	bot, err := botgolang.NewBot(os.Getenv("BOT_TOKEN"), options...)
 	if err != nil {
 		log.Fatal(err)
 	}

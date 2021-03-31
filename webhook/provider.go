@@ -50,7 +50,7 @@ func (p *Provider) initEcho() {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
-	if strings.EqualFold(os.Getenv("MODE"), "debug") {
+	if strings.EqualFold(os.Getenv("DEBUG"), "true") {
 		e.Debug = true
 		e.Logger.SetLevel(log.DEBUG)
 		e.Logger.Debug("debug mode enabled")
