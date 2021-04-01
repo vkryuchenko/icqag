@@ -58,6 +58,7 @@ func (p *Provider) initEcho() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	//
+	e.GET("/health", func(echo.Context) error { return nil })
 	e.PUT("/:source/:target", p.handleMessage)
 	e.POST("/:source/:target", p.handleMessage)
 	//
