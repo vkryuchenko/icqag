@@ -3,7 +3,6 @@ FROM golang:alpine AS builder
 ENV GOPATH="/go" CGO_ENABLED=0
 WORKDIR /app
 COPY . .
-RUN apk add --no-cache git
 RUN go mod tidy
 RUN go build -ldflags "-w -s -linkmode internal" -o icqag icqag.go
 
