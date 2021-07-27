@@ -1,18 +1,17 @@
 package main
 
 import (
-	"github.com/labstack/gommon/log"
 	"github.com/mail-ru-im/bot-golang"
+	"go.uber.org/zap"
 	"icqag/webhook"
 	"os"
 )
 
-func init() {
-	log.SetLevel(log.INFO)
-	//http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-}
-
 func main() {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
 	var options []botgolang.BotOption
 	apiUrl := os.Getenv("API_URL")
 	if apiUrl != "" {
@@ -24,8 +23,8 @@ func main() {
 	}
 	bot, err := botgolang.NewBot(os.Getenv("BOT_TOKEN"), options...)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err.Error())
 	}
-	webProvider := webhook.Provider{Bot: bot}
-	log.Fatal(webProvider.Start())
+	webProvider := webhook.Provider{Bot: bot, Logger: logger}
+	logger.Fatal(webProvider.Start().Error())
 }

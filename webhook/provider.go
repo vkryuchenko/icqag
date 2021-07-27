@@ -2,10 +2,9 @@ package webhook
 
 import (
 	"errors"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/labstack/gommon/log"
+	"github.com/go-chi/chi/v5"
 	"github.com/mail-ru-im/bot-golang"
+	"go.uber.org/zap"
 	"icqag/alertsource/alertmanager"
 	"icqag/alertsource/grafana"
 	"icqag/alertsource/jenkins"
@@ -13,8 +12,6 @@ import (
 	"icqag/alertsource/raw"
 	"icqag/alertsource/teamcity"
 	"net/http"
-	"os"
-	"strings"
 )
 
 var payloadSourceMap = map[string]Payload{
@@ -29,13 +26,13 @@ var payloadSourceMap = map[string]Payload{
 
 // Payload interface for any data from any alert systems
 type Payload interface {
-	Parse(req *http.Request, logger echo.Logger) (string, error)
+	Parse(r *http.Request, logger *zap.Logger) (string, error)
 }
 
 // Provider represent single instances of bot and echo
 type Provider struct {
-	Bot      *botgolang.Bot
-	instance *echo.Echo
+	Bot    *botgolang.Bot
+	Logger *zap.Logger
 }
 
 func (Provider) payloadBySourceName(sourceName string) (Payload, error) {
@@ -46,28 +43,17 @@ func (Provider) payloadBySourceName(sourceName string) (Payload, error) {
 	return payload, nil
 }
 
-func (p *Provider) initEcho() {
-	e := echo.New()
-	e.HideBanner = true
-	e.HidePort = true
-	if strings.EqualFold(os.Getenv("DEBUG"), "true") {
-		e.Debug = true
-		e.Logger.SetLevel(log.DEBUG)
-		e.Logger.Debug("debug mode enabled")
-	}
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	//
-	e.GET("/health", func(echo.Context) error { return nil })
-	e.PUT("/:source/:target", p.handleMessage)
-	e.POST("/:source/:target", p.handleMessage)
-	//
-	p.instance = e
-
-}
-
-// Start prepare echo instance and start it
+// Start prepare routes and serve them
 func (p *Provider) Start() error {
-	p.initEcho()
-	return p.instance.Start(":8888")
+	router := chi.NewRouter()
+	router.Put("/{source}/{target}", p.handleMessage)
+	router.Post("/{source}/{target}", p.handleMessage)
+	router.Get(
+		"/health",
+		func(w http.ResponseWriter, r *http.Request) {
+			http.Error(w, "", http.StatusOK)
+
+		},
+	)
+	return http.ListenAndServe(":8888", router)
 }

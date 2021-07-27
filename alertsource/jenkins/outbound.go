@@ -2,7 +2,7 @@ package jenkins
 
 import (
 	"encoding/json"
-	"github.com/labstack/echo"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -24,7 +24,7 @@ type OutboundMessage struct {
 	ProjectName string `json:"projectName"`
 }
 
-func (*OutboundMessage) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
+func (*OutboundMessage) transform(data io.ReadCloser, logger *zap.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
@@ -44,6 +44,6 @@ func (*OutboundMessage) transform(data io.ReadCloser, logger echo.Logger) (strin
 }
 
 // Parse implement Payload.Parse()
-func (m OutboundMessage) Parse(req *http.Request, logger echo.Logger) (string, error) {
+func (m OutboundMessage) Parse(req *http.Request, logger *zap.Logger) (string, error) {
 	return m.transform(req.Body, logger)
 }

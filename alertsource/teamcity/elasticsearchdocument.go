@@ -2,7 +2,7 @@ package teamcity
 
 import (
 	"encoding/json"
-	"github.com/labstack/echo"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -38,7 +38,7 @@ type ElasticsearchDocumentMessage struct {
 	TriggeredBy       string `json:"triggeredBy"`
 }
 
-func (*ElasticsearchDocumentMessage) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
+func (*ElasticsearchDocumentMessage) transform(data io.ReadCloser, logger *zap.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
@@ -65,6 +65,6 @@ func (*ElasticsearchDocumentMessage) transform(data io.ReadCloser, logger echo.L
 }
 
 // Parse implement Payload.Parse()
-func (m ElasticsearchDocumentMessage) Parse(req *http.Request, logger echo.Logger) (string, error) {
+func (m ElasticsearchDocumentMessage) Parse(req *http.Request, logger *zap.Logger) (string, error) {
 	return m.transform(req.Body, logger)
 }

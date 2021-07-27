@@ -1,7 +1,7 @@
 package raw
 
 import (
-	"github.com/labstack/echo"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,7 +10,7 @@ import (
 // Message represent data from any data
 type Message []byte
 
-func transformMessage(data io.ReadCloser, logger echo.Logger) (string, error) {
+func transformMessage(data io.ReadCloser, logger *zap.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
@@ -20,6 +20,6 @@ func transformMessage(data io.ReadCloser, logger echo.Logger) (string, error) {
 }
 
 // Parse implement Payload.Parse()
-func (m Message) Parse(req *http.Request, logger echo.Logger) (string, error) {
+func (m Message) Parse(req *http.Request, logger *zap.Logger) (string, error) {
 	return transformMessage(req.Body, logger)
 }

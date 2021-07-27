@@ -2,7 +2,7 @@ package alertmanager
 
 import (
 	"encoding/json"
-	"github.com/labstack/echo"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -33,7 +33,7 @@ type Message struct {
 	Alerts       []Alert     `json:"alerts"`
 }
 
-func (*Message) transform(data io.ReadCloser, logger echo.Logger) (string, error) {
+func (*Message) transform(data io.ReadCloser, logger *zap.Logger) (string, error) {
 	messageBytes, err := ioutil.ReadAll(data)
 	if err != nil {
 		return "", err
@@ -63,6 +63,6 @@ func (*Message) transform(data io.ReadCloser, logger echo.Logger) (string, error
 }
 
 // Parse implement Payload.Parse()
-func (gm Message) Parse(req *http.Request, logger echo.Logger) (string, error) {
+func (gm Message) Parse(req *http.Request, logger *zap.Logger) (string, error) {
 	return gm.transform(req.Body, logger)
 }
