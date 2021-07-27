@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 RUN apk add --no-cache git
 RUN go mod tidy
-RUN go build -o icqag icqag.go
+RUN go build -ldflags "-w -s -linkmode internal" -o icqag icqag.go
 
 FROM alpine:latest
 RUN apk add --no-cache ca-certificates
