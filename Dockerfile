@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine3.14 AS builder
+FROM golang:1.17.2-alpine3.14 AS builder
 
 ENV GOPATH="/go" CGO_ENABLED=0
 WORKDIR /app

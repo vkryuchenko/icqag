@@ -3,9 +3,9 @@ module icqag
 go 1.17
 
 require (
-	github.com/go-chi/chi/v5 v5.0.3
-	github.com/mail-ru-im/bot-golang v0.0.0-20210730091205-4fca30eb4397
-	go.uber.org/zap v1.19.0
+	github.com/go-chi/chi/v5 v5.0.5
+	github.com/mail-ru-im/bot-golang v0.0.0-20210907151920-f8926c7e295d
+	go.uber.org/zap v1.19.1
 )
 
 require (
@@ -15,5 +15,5 @@ require (
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/sys v0.0.0-20190422165155-953cdadca894 // indirect
+	golang.org/x/sys v0.0.0-20210510120138-977fb7262007 // indirect
 )
